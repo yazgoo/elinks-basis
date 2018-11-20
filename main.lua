@@ -98,8 +98,10 @@ function command(c)
     for word in c:gmatch("%S+") do table.insert(args, word) end
     if args[1] == "source" then
       source(args[2])
+      return nil
     elseif args[1] == "update" then
       plug_update()
+      return "goto_url", current_url()
     end
 end
 
