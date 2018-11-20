@@ -93,16 +93,35 @@ function message(m)
     xdialog(m, function() end)
 end
 
+command_names = {}
+command_functions = {}
+
+function add_command(name, fn)
+  local k = -1
+  for i,v in pairs(command_names) do
+    if v == name then
+      k = i
+    end
+  end
+  if k ~= -1 then
+    table.remove(command_names, k)
+    table.remove(command_functions, k)
+  end
+  table.insert(command_names, name)
+  table.insert(command_functions, fn)
+end
+
 function command(c)
     args = {}
     for word in c:gmatch("%S+") do table.insert(args, word) end
-    if args[1] == "source" then
-      source(args[2])
-      return nil
-    elseif args[1] == "update" then
-      plug_update()
-      return "goto_url", current_url()
+    for i,v in pairs(command_names) do
+      if v == args[1] then
+        return command_functions[i](args)
+      end
     end
 end
+
+add_command("source", function(args) source(args[2]) end)
+add_command("update", function(args) plug_update() end)
 
 bind_key("main", ":", function () xdialog("", command) end )
